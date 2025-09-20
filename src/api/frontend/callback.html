@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Callback Verification</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <style>
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+      }
+
+      50% {
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+      }
+    }
+
+    @keyframes slide-up {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes bounce-in {
+      0% {
+        transform: scale(0.3);
+        opacity: 0;
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      70% {
+        transform: scale(0.9);
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes spin-slow {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .animate-pulse-glow {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    .animate-slide-up {
+      animation: slide-up 0.6s ease-out;
+    }
+
+    .animate-bounce-in {
+      animation: bounce-in 0.8s ease-out;
+    }
+
+    .animate-spin-slow {
+      animation: spin-slow 2s linear infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-black min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+  <div id="particles-js" class="absolute inset-0 z-0"></div>
+  <div class="w-full max-w-md relative z-10">
+    <div id="loadingState"
+      class="bg-gray-900 bg-opacity-90 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-gray-600 animate-slide-up">
+      <div class="text-center">
+        <div class="relative mb-6">
+          <div class="w-16 h-16 mx-auto bg-blue-600 rounded-full flex items-center justify-center animate-pulse-glow">
+            <svg class="w-8 h-8 text-white animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+              </path>
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-2xl font-bold text-white mb-2">Verifying Callback</h2>
+        <p class="text-gray-400 mb-6">Processing your request...</p>
+        <div class="w-full bg-gray-700 rounded-full h-2 mb-4">
+          <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%">
+          </div>
+        </div>
+        <p id="loadingText" class="text-sm text-gray-500">Initiating verification...</p>
+      </div>
+    </div>
+
+    <div id="successState"
+      class="bg-gray-900 bg-opacity-90 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-green-500 hidden animate-bounce-in">
+      <div class="text-center">
+        <div
+          class="w-16 h-16 mx-auto bg-green-600 rounded-full flex items-center justify-center mb-6 animate-pulse-glow">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-green-400 mb-2">Callback Valid!</h2>
+        <p class="text-gray-300 mb-6">Your verification was processed successfully.</p>
+        <div class="bg-gray-700 rounded-lg p-4 mb-6">
+          <p class="text-sm text-gray-400 mb-2">Details:</p>
+          <p id="successDetail" class="text-green-400 font-mono text-sm"></p>
+        </div>
+        <button onclick="continueAction()"
+          class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
+          Continue
+        </button>
+      </div>
+    </div>
+
+    <div id="errorState"
+      class="bg-gray-900 bg-opacity-90 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-red-500 hidden animate-bounce-in">
+      <div class="text-center">
+        <div class="w-16 h-16 mx-auto bg-red-600 rounded-full flex items-center justify-center mb-6 animate-pulse-glow">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-red-400 mb-2">Invalid Callback</h2>
+        <p class="text-gray-300 mb-6">An error occurred during verification.</p>
+        <div class="bg-gray-700 rounded-lg p-4 mb-6">
+          <p class="text-sm text-gray-400 mb-2">Error details:</p>
+          <p id="errorMessage" class="text-red-400 font-mono text-sm"></p>
+        </div>
+        <div class="space-y-3">
+          <button onclick="retryLogin()"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
+            Try Again
+          </button>
+          <button onclick="retryLogin()"
+            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300">
+            Back to Start
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const loadingState = document.getElementById('loadingState');
+    const successState = document.getElementById('successState');
+    const errorState = document.getElementById('errorState');
+    const progressBar = document.getElementById('progressBar');
+    const loadingText = document.getElementById('loadingText');
+    const errorMessage = document.getElementById('errorMessage');
+    const successDetail = document.getElementById('successDetail');
+
+    function getCookie(name) {
+      const value = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+      return value ? value.pop() : null;
+    }
+
+    function showResult() {
+      const success = getCookie('callback_success');
+      const message = getCookie('callback_message');
+
+      if (success === null || message === null) {
+        loadingState.classList.add('hidden');
+        errorState.classList.remove('hidden');
+        errorMessage.textContent = 'An unknown error occurred.';
+        // errorMessage.textContent = 'Verification cookie not found or expired.';
+        return;
+      }
+
+      loadingState.classList.add('hidden');
+
+      if (success === 'true') {
+        successState.classList.remove('hidden');
+        successDetail.textContent = 'Verification successful!';
+        // successDetail.textContent = message || 'Verification successful!';
+      } else {
+        errorState.classList.remove('hidden');
+        errorMessage.textContent = message || 'An unknown error occurred.';
+      }
+
+      document.cookie = "callback_success=; Max-Age=0; path=/";
+      document.cookie = "callback_message=; Max-Age=0; path=/";
+    }
+
+    function simulateLoading() {
+      let progress = 0;
+      loadingText.textContent = 'Initiating verification...';
+      const interval = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = progress + '%';
+        if (progress >= 100) {
+          clearInterval(interval);
+          loadingText.textContent = 'Done!';
+          setTimeout(showResult, 300);
+        } else if (progress > 70) {
+          loadingText.textContent = 'Finalizing...';
+        } else if (progress > 30) {
+          loadingText.textContent = 'Processing verification...';
+        }
+      }, 150);
+    }
+
+    function retryLogin() {
+      window.location.href = '/auth/discord/login';
+    }
+
+    function continueAction() {
+      window.close();
+    }
+
+    simulateLoading();
+
+    particlesJS('particles-js', {
+      particles: {
+        number: {
+          value: 100,
+          density: {
+            enable: true,
+            value_area: 800
+          }
+        },
+        color: {
+          value: ['#ffffff', '#e2e8f0', '#cbd5e1']
+        },
+        shape: {
+          type: 'circle',
+          stroke: {
+            width: 0,
+            color: '#000000'
+          }
+        },
+        opacity: {
+          value: 0.6,
+          random: true,
+          anim: {
+            enable: true,
+            speed: 1,
+            opacity_min: 0.1,
+            sync: false
+          }
+        },
+        size: {
+          value: 3,
+          random: true,
+          anim: {
+            enable: false,
+            speed: 40,
+            size_min: 0.1,
+            sync: false
+          }
+        },
+        line_linked: {
+          enable: false
+        },
+        move: {
+          enable: true,
+          speed: 2,
+          direction: 'bottom',
+          random: true,
+          straight: false,
+          out_mode: 'out',
+          bounce: false,
+          attract: {
+            enable: false,
+            rotateX: 600,
+            rotateY: 1200
+          }
+        }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: {
+          onhover: {
+            enable: false
+          },
+          onclick: {
+            enable: false
+          },
+          resize: true
+        }
+      },
+      retina_detect: true
+    });
+  </script>
+</body>
+
+</html>
