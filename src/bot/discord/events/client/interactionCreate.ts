@@ -10,10 +10,20 @@ export default createEvent({
     if (interaction.isCommand()) {
       const cmd = client.slashCommands.get(interaction.commandName);
 
-      if (!cmd) return console.log("asd");
+      if (!cmd) {
+        await interaction.reply({ flags: ['Ephemeral'], content: '❌ | Command not found.' });
+        return;
+      }
 
-      // The development system will not be used at this time.
-      // if (cmd.dev)
+      if (cmd?.dev?.active == false) {
+        await interaction.reply({ flags: ['Ephemeral'], content: '🚧 | Command is not active.' });
+        return;
+      }
+
+      if (cmd?.dev?.only) {
+        await interaction.reply({ flags: ['Ephemeral'], content: '❌ | Only **Developers** can use this command.' });
+        return;
+      }
 
       if (interaction.guild || cmd.permissions) {
         const permissionsNeeded = cmd.permissions as PermissionResolvable[];
